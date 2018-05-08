@@ -7,7 +7,7 @@
   - vlan_id: 440
   - vlan_name: Printers
   vars_files:
-  - ../creds.yml
+  - ../cisco-cred
 
   tasks:
 

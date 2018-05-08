@@ -4,7 +4,7 @@
   gather_facts: False
   hosts: mpls
   vars_files:
-  - ../creds.yml
+  - ../cisco-cred
 
   tasks:
 
