@@ -1,2 +1,2 @@
 # ansible
-Ansible scripts used for 
+Ansible scripts used for the network infrastructure
