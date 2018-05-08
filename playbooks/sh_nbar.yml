@@ -1,0 +1,21 @@
+---
+- name: show ip nbar version
+  connection: local
+  gather_facts: "False"
+  hosts: mpls
+  vars_files:
+  - ../cisco-cred
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: run the show command
+    ios_command:
+      provider: "{{provider}}"
+      commands: show ip nbar version

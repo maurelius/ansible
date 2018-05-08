@@ -1,0 +1,27 @@
+---
+- name: change vstack config for smartinstall
+  connection: local
+  gather_facts: "False"
+  hosts: all
+  vars_files:
+  - ../cisco-cred
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: remove vstack configuration
+    ios_config:
+      provider: "{{provider}}"
+      timeout: 60
+      lines: no vstack
+
+  - name: save current running configuration
+    ios_command:
+      provider: "{{provider}}"
+      commands: wr mem

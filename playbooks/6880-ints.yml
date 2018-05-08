@@ -1,0 +1,22 @@
+---
+- name: find all (notconnect) interfaces
+  connection: local
+  gather_facts: "False"
+  hosts: 6880-wa
+  vars_files:
+  - ../cisco-cred
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: get all interfaces that are down/notconnect
+    ios_command:
+      provider: "{{provider}}"
+      commands:
+        - show interfaces | i notconnect

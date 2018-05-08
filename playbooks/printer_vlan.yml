@@ -1,0 +1,51 @@
+---
+- name: config new printer vlan
+  connection: local
+  gather_facts: "False"
+  hosts: mq
+  vars:
+  - vlan_id: 440
+  - vlan_name: Printers
+  vars_files:
+  - ../creds.yml
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: configure edge ports
+    ios_config:
+      provider: "{{provider}}"
+      lines:
+        - switchport trunk allowed vlan add "{{vlan_id}}"
+      parents:
+        - interface "{{item.port}}"
+    with_items: "{{edgeports}}"
+    when: (item.sw == inventory_hostname)
+
+  - name: configure core trunk ports
+    ios_config:
+      provider: "{{provider}}"
+      lines:
+        - switchport trunk allowed vlan add "{{vlan_id}}"
+      parents:
+        - interface "{{item.port}}"
+    with_items: "{{coretrunks}}"
+    when: (item.sw == inventory_hostname)
+
+  - name: create vlan
+    ios_config:
+      provider: "{{provider}}"
+      lines:
+        - name "{{vlan_name}}"
+      parents:
+        - vlan: "{{vlan_id}}"
+
+#  - name: save the running configuration
+#    ios_command:
+#      commands: wr mem

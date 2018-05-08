@@ -1,0 +1,23 @@
+---
+- name: show the directory contents and boot configuration of devices
+  connection: local
+  gather_facts: "False"
+  hosts: mpls
+  vars_files:
+  - ../creds.yml
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: run the dir and show commands
+    ios_command:
+      provider: "{{provider}}"
+      commands:
+        - dir
+        - sh run | i boot

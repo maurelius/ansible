@@ -1,0 +1,21 @@
+---
+- name: delete NBAR packs
+  connection: local
+  gather_facts: False
+  hosts: mpls
+  vars_files:
+  - ../creds.yml
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: delete the files 
+    ios_command:
+      provider: "{{provider}}"
+      commands: del /force *.pack

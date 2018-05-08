@@ -1,0 +1,26 @@
+---
+- name: config new nbar pack
+  connection: local
+  gather_facts: False
+  hosts: mpls
+  vars_files:
+  - ../creds.yml
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: run the config command
+    ios_config:
+      provider: "{{provider}}"
+      lines:
+      - "ip nbar protocol-pack flash:pp-adv-isrg2-152-4.M1-13-6.2.0.pack" 
+  
+  - name: save the running configuration
+    ios_command:
+      commands: wr mem

@@ -1,0 +1,43 @@
+---
+- name: change IOS image
+  connection: local
+  gather_facts: "False"
+  hosts: mpls
+  vars_files:
+  - ../creds.yml
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: delete old image from router
+    ios_command:
+      provider: "{{provider}}"
+      commands:
+        - "del /force flash0:c2900-universalk9-mz.SPA.155-3.M4a.bin"
+    ignore_errors: "True"
+
+  - name: copy the new image to router
+    ntc_file_copy:
+      provider: "{{provider}}"
+      platform: cisco_ios_ssh
+      local_file: /tftpboot/router/c2900-universalk9-mz.SPA.155-3.M7.bin
+      remote_file: c2900-universalk9-mz.SPA.155-3.M7.bin
+
+  - name: change boot image on router
+    ios_config:
+      provider: "{{provider}}"
+      commands:
+        - "boot system flash0:c2900-universalk9-mz.SPA.155-3.M7.bin"
+      save_when: modified
+
+#  - name: save the config
+#    ios_command:
+#      provider: "{{provider}}"
+#      commands:
+#        - wr mem

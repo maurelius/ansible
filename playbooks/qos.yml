@@ -1,0 +1,164 @@
+---
+- name: config new QoS Policy
+  connection: local
+  gather_facts: "False"
+  hosts: mpls
+  vars_files:
+  - ../creds.yml
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: configure access lists for business critical apps
+    ios_config:
+      provider: "{{provider}}"
+      lines:
+        - remark Identify & reserve bandwidth for Business critical apps
+        - permit tcp any host 101.1.0.106 eq 80
+        - permit tcp any host 101.1.0.106 eq 443
+        - permit tcp any any eq 1033
+        - permit tcp any range 8100 8500 any
+        - permit udp any range 8100 8500 any
+      parents: ip access-list extended BUSINESS-APPS
+      save_when: modified
+
+  - name: configure class maps for all other business apps
+    ios_config:
+      provider: "{{provider}}"
+      lines:
+        - class-map match-all CM-BUSINESS-APPS
+        - match access-group name BUSINESS-APPS
+        - class-map match-all CM-NETWORK-CONTROL-NBAR
+        - match protocol attribute traffic-class network-control
+        - match protocol attribute business-relevance business-relevant
+        - class-map match-all CM-MULTIMEDIA-CONFERENCING-NBAR
+        - match protocol attribute traffic-class multimedia-conferencing
+        - match protocol attribute business-relevance business-relevant
+        - class-map match-all CM-BROADCAST-VIDEO-NBAR
+        - match protocol attribute traffic-class broadcast-video
+        - match protocol attribute business-relevance business-relevant
+        - class-map match-all CM-BULK-DATA-NBAR
+        - match protocol attribute traffic-class bulk-data
+        - match protocol attribute business-relevance business-relevant
+        - class-map match-all CM-VOICE-NBAR
+        - match protocol attribute traffic-class voip-telephony
+        - match protocol attribute business-relevance business-relevant
+        - class-map match-all CM-SCAVENGER-NBAR
+        - match protocol attribute business-relevance business-irrelevant
+        - class-map match-all CM-SIGNALING-NBAR
+        - match protocol attribute traffic-class signaling
+        - match protocol attribute business-relevance business-relevant
+        - class-map match-all CM-REAL-TIME-INTERACTIVE-NBAR
+        - match protocol attribute traffic-class real-time-interactive
+        - match protocol attribute business-relevance business-relevant
+        - class-map match-all CM-TRANSACTIONAL-DATA-NBAR
+        - match protocol attribute traffic-class transactional-data
+        - match protocol attribute business-relevance business-relevant
+        - class-map match-all CM-MULTIMEDIA-STREAMING-NBAR
+        - match protocol attribute traffic-class multimedia-streaming
+        - match protocol attribute business-relevance business-relevant
+        - class-map match-all CM-NETWORK-MANAGEMENT-NBAR
+        - match protocol attribute traffic-class ops-admin-mgmt
+        - match protocol attribute business-relevance business-relevant
+      match: line
+      save_when: modified
+
+  - name: Create policy map for marking traffic entering from LAN
+    ios_config:
+      provider: "{{provider}}"
+      lines:
+        - policy-map PM-INGRESS-AVC-MARKING
+        - class CM-VOICE-NBAR
+        - set dscp ef
+        - class CM-BUSINESS-APPS
+        - set dscp af21
+        - class CM-BROADCAST-VIDEO-NBAR
+        - set dscp cs5
+        - class CM-REAL-TIME-INTERACTIVE-NBAR
+        - set dscp cs4
+        - class CM-MULTIMEDIA-CONFERENCING-NBAR
+        - set dscp af41
+        - class CM-MULTIMEDIA-STREAMING-NBAR
+        - set dscp af31
+        - class CM-SIGNALING-NBAR
+        - set dscp cs3
+        - class CM-NETWORK-CONTROL-NBAR
+        - set dscp cs6
+        - class CM-NETWORK-MANAGEMENT-NBAR
+        - set dscp cs2
+        - class CM-TRANSACTIONAL-DATA-NBAR
+        - set dscp af21
+        - class CM-BULK-DATA-NBAR
+        - set dscp af11
+        - class CM-SCAVENGER-NBAR
+        - set dscp cs1
+        - class class-default
+        - set dscp default
+      match: line
+      save_when: modified
+
+  - name: create class map to identify outbound traffic
+    ios_config:
+      provider: "{{provider}}"
+      lines:
+        - class-map match-all CM-MPLS-QUEUE-1
+        - match dscp ef
+        - class-map match-any CM-MPLS-QUEUE-2
+        - match dscp cs4
+        - match dscp cs6
+        - match dscp cs7
+        - match dscp af41
+        - match dscp af42
+        - match dscp af43
+        - match dscp cs3
+        - class-map match-any CM-MPLS-QUEUE-3
+        - match dscp cs2
+        - match dscp af31
+        - match dscp af32
+        - match dscp af33
+        - match dscp cs5
+        - class-map match-any CM-MPLS-QUEUE-4
+        - match dscp af21
+        - match dscp af22
+        - match dscp af23
+        - class-map match-all CM-MPLS-QUEUE-5
+        - match dscp cs1
+      match: line
+      save_when: modified
+
+  - name: create policy maps for outbound traffic
+    ios_config:
+      provider: "{{provider}}"
+      lines:
+        - policy-map PM-MPLS-OUT
+        - class CM-MPLS-QUEUE-1
+        - priority level 1
+        - police cir percent 30
+        - set dscp ef
+        - class CM-MPLS-QUEUE-2
+        - bandwidth remaining percent 10
+        - set dscp af41
+        - class CM-MPLS-QUEUE-3
+        - bandwidth remaining percent 20
+        - random-detect dscp-based
+        - set dscp af31
+        - class CM-MPLS-QUEUE-4
+        - bandwidth remaining percent 10
+        - random-detect dscp-based
+        - set dscp af21
+        - class CM-MPLS-QUEUE-5
+        - bandwidth remaining percent 5
+        - set dscp af11
+        - class class-default
+        - bandwidth remaining percent 25
+        - random-detect
+        - queue-limit 512 packets
+        - set dscp default
+      match: line
+      save_when: modified

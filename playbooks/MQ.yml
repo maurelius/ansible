@@ -1,0 +1,17 @@
+---
+edgeports:
+  - {sw: 10.4.87.2, port: GigabitEthernet1/1/1}
+  - {sw: 10.4.87.3, port: GigabitEthernet1/1/1}
+  - {sw: 10.4.87.4, port: Port-channel1}
+  - {sw: 10.4.87.5, port: Port-channel3}
+  - {sw: 10.4.87.6, port: Port-channel2}
+  - {sw: 10.4.87.10, port: Port-channel1}
+
+coretrunks:
+  - {sw: 10.4.87.1, port: Port-channel1}
+  - {sw: 10.4.87.1, port: Port-channel2}
+  - {sw: 10.4.87.1, port: Port-channel3}
+  - {sw: 10.4.87.1, port: Port-channel10}
+
+vlanname: Printers
+vlan: 440

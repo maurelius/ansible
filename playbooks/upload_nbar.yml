@@ -1,0 +1,29 @@
+---
+- name: upload NBAR pack
+  connection: local
+  gather_facts: "False"
+  hosts: mpls
+  vars_files:
+  - ../creds.yml
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: copy the file
+    ntc_file_copy:
+      provider: "{{provider}}"
+      platform: cisco_ios_ssh
+      local_file: /tftpboot/nbar/pp-adv-isrg2-155-3.M4a-23-32.1.0.pack
+
+#  - name: load the pack file
+#    ios_config:
+#      provider: "{{provider}}"
+#      commands:
+#        - "ip nbar protocol-pack flash:pp-adv-isrg2-155-3.M4a-23-32.1.0.pack"
+#    save_when: modified

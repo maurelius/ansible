@@ -1,0 +1,21 @@
+---
+- name: gather facts of IOS devices
+  connection: local
+  gather_facts: "False"
+  hosts: all
+  vars_files:
+  - ../cisco-cred
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: get the facts
+    ios_facts:
+      provider: "{{provider}}"
+      gather_subset: all

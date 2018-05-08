@@ -1,0 +1,29 @@
+---
+- name: show vstack config
+  connection: local
+  remote_user: admin
+  gather_facts: "False"
+  hosts: all
+  vars_files:
+  - ../cisco-cred
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: show vstack config
+    ios_command:
+      provider: "{{provider}}"
+      commands: show vstack config | i (Role|Oper)
+
+  - name: show version
+    ios_facts:
+      provider: "{{provider}}"
+      gather_subset: "!config"
+
+  - debug: var=ansible_net_version
