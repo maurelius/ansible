@@ -1,0 +1,30 @@
+---
+- name: collect information for Cisco TAC on stack-port errors for MAIN-OFC-1
+  connection: local
+  gather_facts: "False"
+  hosts: all
+  vars_files:
+  - ../cisco-cred
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: run the show commands
+    ios_command:
+      provider: "{{provider}}"
+      commands:
+        - show platform port-asic 0 read register SifRacRwCrcErrorCnt switch {{ item.name }}
+        - show platform port-asic 1 read register SifRacRwCrcErrorCnt switch {{ item.name }}
+    with_items:
+      - name: 1
+      - name: 2
+      - name: 3
+      - name: 4
+      - name: 5
+      - name: 6
