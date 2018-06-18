@@ -1,0 +1,23 @@
+---
+- name: show version
+  connection: local
+  gather_facts: "False"
+  hosts: all
+  vars_files:
+  - ../cisco-cred
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: run the show command
+    ios_facts:
+      provider: "{{provider}}"
+      gather_subset: all
+    register: facts
+  - debug: var=ansible_net_version
