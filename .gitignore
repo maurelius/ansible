@@ -1,0 +1,14 @@
+# inventory files #
+###################
+inventory.ini
+oldinventory.yml
+smartinstall.ini
+
+# vault #
+#########
+cisco-cred
+
+# logs and misc #
+#################
+*.log
+*.retry
