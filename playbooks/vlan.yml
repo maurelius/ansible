@@ -1,0 +1,23 @@
+---
+- name: show version
+  connection: local
+  gather_facts: "False"
+  hosts: all
+  vars_files:
+  - ../cisco-cred
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: show the VLANs
+    ios_command:
+      provider: "{{provider}}"
+      commands: show vlan brief
+    register: show_vlan
+  - debug: var=show_vlan.stdout_lines
