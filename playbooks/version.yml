@@ -16,8 +16,6 @@
         host: "{{inventory_hostname}}"
 
   - name: run the show command
-    ios_facts:
+    ios_command:
       provider: "{{provider}}"
-      gather_subset: all
-    register: facts
-  - debug: var=ansible_net_version
+      commands: show version
