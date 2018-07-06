@@ -18,4 +18,4 @@
   - name: get the facts
     ios_facts:
       provider: "{{provider}}"
-      gather_subset: all
+      gather_subset: hardware
