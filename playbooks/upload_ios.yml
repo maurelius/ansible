@@ -1,8 +1,8 @@
 ---
-- name: change IOS image
+- name: change IOS-XE image on 3850 switch
   connection: local
   gather_facts: "False"
-  hosts: mpls
+  hosts: all
   vars_files:
   - ../cisco-cred
 
@@ -15,29 +15,16 @@
         password: "{{password}}"
         host: "{{inventory_hostname}}"
 
-  - name: delete old image from router
-    ios_command:
-      provider: "{{provider}}"
-      commands:
-        - "del /force flash0:c2900-universalk9-mz.SPA.155-3.M4a.bin"
-    ignore_errors: "True"
-
   - name: copy the new image to router
     ntc_file_copy:
       provider: "{{provider}}"
       platform: cisco_ios_ssh
-      local_file: /tftpboot/router/c2900-universalk9-mz.SPA.155-3.M7.bin
-      remote_file: c2900-universalk9-mz.SPA.155-3.M7.bin
+      local_file: /tftpboot/cat3k_caa-universalk9.16.03.06.SPA.bin
+      remote_file: cat3k_caa-universalk9.16.03.06.SPA.bin 
 
   - name: change boot image on router
     ios_config:
       provider: "{{provider}}"
       commands:
-        - "boot system flash0:c2900-universalk9-mz.SPA.155-3.M7.bin"
+        - "software install file flash:cat3k_caa-universalk9.16.03.06.SPA.bin new force"
       save_when: modified
-
-#  - name: save the config
-#    ios_command:
-#      provider: "{{provider}}"
-#      commands:
-#        - wr mem
