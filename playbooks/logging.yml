@@ -1,0 +1,32 @@
+---
+- name: add logging configuration to device
+  connection: local
+  gather_facts: "False"
+  hosts: all
+  vars_files:
+  - ../cisco-cred
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: add logging and logging host
+    ios_config:
+      provider: "{{provider}}"
+      lines:
+        - logging buffered 131072 informational
+        - logging trap informational
+        - logging console errors
+        - logging monitor errors
+        - logging host 101.1.0.177
+      save_when: modified
+#
+#  - name: save current running configuration
+#    ios_config:
+#      provider: "{{provider}}"
+#      command: wr mem
