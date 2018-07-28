@@ -18,7 +18,6 @@
   - name: modify the access-list SNMP_ACL
     ios_config:
       provider: "{{provider}}"
-      timeout: 60
       lines:
         - no deny any log
         - permit 10.2.0.0 0.0.255.255
