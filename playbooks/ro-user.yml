@@ -1,0 +1,31 @@
+---
+- name: Create Read-Only User Access Role On Cisco Devices
+  connection: local
+  gather_facts: "False"
+  hosts: all
+  vars_files:
+  - ../cisco-cred
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: Create Parser View for Show Commands
+    ios_config:
+      provider: "{{provider}}"
+      lines:
+        - secret Husc0ro
+        - commands exec include all show
+      parents:
+        - parser view SHOW-ALL-VIEW
+
+  - name: Create Read-Only User w/ Parser View
+    ios_config:
+      provider: "{{provider}}"
+      lines:
+        - username huscoro view SHOW-ALL-VIEW privilege 3 secret Husc0ro
