@@ -1,0 +1,23 @@
+---
+- name: check device for err-disabled ports
+  connection: local
+  gather_facts: "False"
+  hosts: all
+  remote_user: admin
+  vars_files:
+  - ../cisco-cred
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: check interface status
+    ios_command:
+      provider: "{{provider}}"
+      commands:
+        - show interface status | i err-disable
