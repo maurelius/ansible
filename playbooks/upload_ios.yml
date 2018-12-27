@@ -19,12 +19,12 @@
     ntc_file_copy:
       provider: "{{provider}}"
       platform: cisco_ios_ssh
-      local_file: /tftpboot/cat3k_caa-universalk9.16.03.06.SPA.bin
-      remote_file: cat3k_caa-universalk9.16.03.06.SPA.bin 
+      local_file: /tftpboot/cat3k_caa-universalk9.16.03.07.SPA.bin
+      remote_file: cat3k_caa-universalk9.16.03.07.SPA.bin
 
   - name: change boot image on router
     ios_config:
       provider: "{{provider}}"
       commands:
-        - "software install file flash:cat3k_caa-universalk9.16.03.06.SPA.bin new force"
+        - "software install file flash:cat3k_caa-universalk9.16.03.07.SPA.bin new force"
       save_when: modified
