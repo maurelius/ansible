@@ -15,14 +15,14 @@
         password: "{{password}}"
         host: "{{inventory_hostname}}"
 
-  - name: copy the new image to router
+  - name: copy the new image to device
     ntc_file_copy:
       provider: "{{provider}}"
       platform: cisco_ios_ssh
       local_file: /tftpboot/cat3k_caa-universalk9.16.03.07.SPA.bin
       remote_file: cat3k_caa-universalk9.16.03.07.SPA.bin
 
-  - name: change boot image on router
+  - name: change boot image on device
     ios_config:
       provider: "{{provider}}"
       commands:
