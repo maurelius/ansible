@@ -1,0 +1,24 @@
+---
+- name: change configured domain name to husco.com
+  connection: local
+  gather_facts: "False"
+  hosts: all
+  vars_files:
+  - ../cisco-cred
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: remove vstack configuration
+    ios_config:
+      provider: "{{provider}}"
+      lines:
+        - no ip domain-name huscointl.com
+        - ip domain-name husco.com
+    save_when: modified

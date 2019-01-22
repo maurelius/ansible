@@ -1,0 +1,23 @@
+---
+- name: change IOS-XE image on 3850 switch
+  connection: local
+  gather_facts: "False"
+  hosts: all
+  vars_files:
+  - ../cisco-cred
+
+  tasks:
+
+  - name: configure provider
+    set_fact:
+      provider:
+        username: "{{username}}"
+        password: "{{password}}"
+        host: "{{inventory_hostname}}"
+
+  - name: change boot image on device
+    ios_config:
+      provider: "{{provider}}"
+      commands:
+        - "software install file flash:cat3k_caa-universalk9.16.03.07.SPA.bin new force"
+      save_when: modified
