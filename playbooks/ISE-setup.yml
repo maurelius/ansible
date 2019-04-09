@@ -1,0 +1,152 @@
+---
+- name: Configure Cisco Switch for ISE TACACS/RADIUS
+  connection: local
+  gather_facts: "False"
+  hosts: all
+
+  tasks:
+
+  - name: create keepalive user & define radius source 
+    ios_config:
+      lines:
+        - username RADIUS-KEEPALIVE password 0 RADIUS-TESTING
+        - ip radius source-interface Vlan287
+      save_when: modified
+
+  - name: configure TACACS server group
+    ios_config:
+      lines:
+        - server name ISE1
+        - server name ISE2
+        - ip tacacs source-interface Vlan287
+      parents:
+        - aaa group server tacacs+ ISE-TACACS
+      save_when: modified
+
+  - name: configure RADIUS server group
+    ios_config:
+      lines:
+        - server name ISE-PSN1
+        - server name ISE-PSN2
+      parents:
+        - aaa group server radius ISE-RADIUS
+      save_when: modified
+
+  - name: configure TACACS server 1
+    ios_config:
+      lines:
+        - address ipv4 10.2.84.7
+        - key VBKfnbCqKjGx7Cgr6C
+      parents:
+        - tacacs server ISE1
+      save_when: modified
+
+  - name: configure TACACS server 2
+    ios_config:
+      lines:
+        - address ipv4 10.3.84.7
+        - key VBKfnbCqKjGx7Cgr6C
+      parents:
+        - tacacs server ISE2
+      save_when: modified
+
+  - name: configure RADIUS server 1
+    ios_config:
+      lines:
+        - address ipv4 10.2.84.7 auth-port 1812 acct-port 1813
+        - automate-tester username RADIUS-KEEPALIVE ignore-acct-port idle-time 5
+        - pac key 42sGUeLyiUWH
+      parents:
+        - radius server ISE-PSN1
+      save_when: modified
+
+  - name: configure RADIUS server 2
+    ios_config:
+      lines:
+        - address ipv4 10.3.84.7 auth-port 1812 acct-port 1813
+        - automate-tester username RADIUS-KEEPALIVE ignore-acct-port idle-time 5
+        - pac key 42sGUeLyiUWH
+      parents:
+        - radius server ISE-PSN2
+      save_when: modified
+
+  - name: configure LLDP device sensors
+    ios_config:
+      lines:
+        - tlv name chassis-id
+        - tlv name system-name
+        - tlv name system-description
+        - tlv name system-capabilities
+        - tlv name management-address
+        - tlv number 28
+      parents: device-sensor filter-list lldp list lldp-list
+      save_when: modified
+
+  - name: configure DHCP device sensors
+    ios_config:
+      lines:
+        - option name domain-name-servers
+        - option name host-name
+        - option name domain-name
+        - option name default-ip-ttl
+        - option name requested-address
+        - option name parameter-request-list
+        - option name class-identifier
+        - option name client-identifier
+      parents: device-sensor filter-list dhcp list dhcp-list
+      save_when: modified
+
+  - name: configure CDP device sensors
+    ios_config:
+      lines:
+        - tlv name device-name
+        - tlv name address-type
+        - tlv name port-id-type
+        - tlv name capabilities-type
+        - tlv name version-type
+        - tlv name platform-type
+        - tlv name duplex-type
+        - tlv number 34
+      parents: device-sensor filter-list cdp list cdp-list
+      save_when: modified
+
+  - name: apply device sensors
+    ios_config:
+      lines:
+        - device-sensor filter-spec dhcp include list dhcp-list
+        - device-sensor filter-spec lldp include list lldp-list
+        - device-sensor filter-spec cdp include list cdp-list
+        - device-sensor notify all-changes
+      save_when: modified
+
+  - name: configure misc. items required for TACACS/RADIUS & SSH backdoor
+    ios_config:
+      lines:
+        - ip device tracking probe auto-source
+        - ip dhcp snooping glean
+        - authentication critical recovery delay 1000
+        - access-session accounting attributes filter-spec include list Device-Sensor-Accounting
+        - access-session mac-move deny
+        - access-session acl default passthrough
+        - dot1x system-auth-control
+        - dot1x critical eapol
+        - radius-server attribute 6 on-for-login-auth
+        - radius-server attribute 8 include-in-access-req
+        - radius-server attribute 25 access-request include
+        - radius-server dead-criteria time 15 tries 3
+        - radius-server deadtime 2
+        - ip http server
+        - ip http secure-server
+        - ip http secure-active-session-modules none
+        - ip http active-session-modules none
+        - ip ssh port 2222 rotary 1
+      save_when: modified
+
+  - name: configure access session attributes
+    ios_config:
+      lines:
+        - cdp
+        - lldp
+        - dhcp
+      parents: access-session attributes filter-list list Device-Sensor-Accounting
+      save_when: modified
