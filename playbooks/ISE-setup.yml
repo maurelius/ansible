@@ -9,7 +9,7 @@
   - name: create keepalive user & define radius source 
     ios_config:
       lines:
-        - username RADIUS-KEEPALIVE password 0 RADIUS-TESTING
+        - username RADIUS-KEEPALIVE password 0 GENERIC-PASSWORD
         - ip radius source-interface Vlan287
       save_when: modified
 
@@ -36,7 +36,7 @@
     ios_config:
       lines:
         - address ipv4 10.2.84.7
-        - key VBKfnbCqKjGx7Cgr6C
+        - key SuperSecretK3y
       parents:
         - tacacs server ISE1
       save_when: modified
@@ -45,7 +45,7 @@
     ios_config:
       lines:
         - address ipv4 10.3.84.7
-        - key VBKfnbCqKjGx7Cgr6C
+        - key SuperSecretK3y
       parents:
         - tacacs server ISE2
       save_when: modified
@@ -55,7 +55,7 @@
       lines:
         - address ipv4 10.2.84.7 auth-port 1812 acct-port 1813
         - automate-tester username RADIUS-KEEPALIVE ignore-acct-port idle-time 5
-        - pac key 42sGUeLyiUWH
+        - pac key SuperSecretK3y
       parents:
         - radius server ISE-PSN1
       save_when: modified
@@ -65,7 +65,7 @@
       lines:
         - address ipv4 10.3.84.7 auth-port 1812 acct-port 1813
         - automate-tester username RADIUS-KEEPALIVE ignore-acct-port idle-time 5
-        - pac key 42sGUeLyiUWH
+        - pac key SuperSecretK3y
       parents:
         - radius server ISE-PSN2
       save_when: modified
