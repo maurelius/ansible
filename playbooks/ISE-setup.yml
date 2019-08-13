@@ -10,7 +10,7 @@
     ios_config:
       lines:
         - username RADIUS-KEEPALIVE password 0 GENERIC-PASSWORD
-        - ip radius source-interface Vlan287
+        - ip radius source-interface $changeVlan$
       save_when: modified
 
   - name: configure TACACS server group
@@ -18,7 +18,7 @@
       lines:
         - server name ISE1
         - server name ISE2
-        - ip tacacs source-interface Vlan287
+        - ip tacacs source-interface $changeVlan$
       parents:
         - aaa group server tacacs+ ISE-TACACS
       save_when: modified
@@ -35,7 +35,7 @@
   - name: configure TACACS server 1
     ios_config:
       lines:
-        - address ipv4 10.2.84.7
+        - address ipv4 $changeIpAddress$
         - key SuperSecretK3y
       parents:
         - tacacs server ISE1
@@ -44,7 +44,7 @@
   - name: configure TACACS server 2
     ios_config:
       lines:
-        - address ipv4 10.3.84.7
+        - address ipv4 $changeIpAddress$
         - key SuperSecretK3y
       parents:
         - tacacs server ISE2
@@ -53,7 +53,7 @@
   - name: configure RADIUS server 1
     ios_config:
       lines:
-        - address ipv4 10.2.84.7 auth-port 1812 acct-port 1813
+        - address ipv4 $matchIpOfTACACSserver1$ auth-port 1812 acct-port 1813
         - automate-tester username RADIUS-KEEPALIVE ignore-acct-port idle-time 5
         - pac key SuperSecretK3y
       parents:
@@ -63,7 +63,7 @@
   - name: configure RADIUS server 2
     ios_config:
       lines:
-        - address ipv4 10.3.84.7 auth-port 1812 acct-port 1813
+        - address ipv4 $matchIpOfTACACSserver2$ auth-port 1812 acct-port 1813
         - automate-tester username RADIUS-KEEPALIVE ignore-acct-port idle-time 5
         - pac key SuperSecretK3y
       parents:
