@@ -1,11 +1,11 @@
 ---
 - name: gather facts of IOS devices
   connection: local
-  gather_facts: "False"
+  gather_facts: "True"
   hosts: all
 
   tasks:
 
   - name: get the facts
     ios_facts:
-      gather_subset: hardware
+      gather_subset: all
